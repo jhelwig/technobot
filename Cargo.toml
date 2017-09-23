@@ -1,0 +1,10 @@
+[package]
+name = "technobot"
+version = "0.1.0"
+authors = ["Jacob Helwig <jacob@technosorcery.net>"]
+
+[dependencies]
+
+[dependencies.serenity]
+git = "https://github.com/zeyla/serenity"
+features = ["cache", "framework", "standard_framework"]
