@@ -1,6 +1,7 @@
+extern crate chrono;
+extern crate rand;
 #[macro_use]
 extern crate serenity;
-extern crate rand;
 
 mod commands;
 
@@ -22,9 +23,11 @@ fn main() {
 
     client.with_framework(StandardFramework::new()
                           .configure(|c| c.prefix(&env::var("TECHNOBOT_PREFIX").unwrap_or("~".to_owned())))
+                          .command("until_reset", |c| c.exec(commands::ffxiv::until_reset))
                           .command("ping", |c| c.exec(commands::misc::ping))
                           .command("latency", |c| c.exec(commands::misc::latency))
-                          .command("8-ball", |c| c.exec(commands::misc::eight_ball)));
+                          .command("8-ball", |c| c.exec(commands::misc::eight_ball))
+    );
 
     if let Err(why) = client.start_autosharded() {
         println!("Client error: {:?}", why);

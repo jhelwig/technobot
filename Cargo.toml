@@ -5,6 +5,7 @@ authors = ["Jacob Helwig <jacob@technosorcery.net>"]
 
 [dependencies]
 rand = "0.3.16"
+chrono = "0.4.0"
 
 [dependencies.serenity]
 git = "https://github.com/zeyla/serenity"
