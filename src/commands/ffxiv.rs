@@ -452,6 +452,20 @@ fn until_string_with_multiple_components() {
 }
 
 #[test]
+fn until_string_with_multiple_components_with_gap() {
+    let now = DateTime::parse_from_rfc3339("2017-09-24T00:00:00Z")
+        .unwrap()
+        .with_timezone(&Utc);
+    let event = DateTime::parse_from_rfc3339("2017-10-09T00:02:00Z")
+        .unwrap()
+        .with_timezone(&Utc);
+    let duration = event.signed_duration_since(now);
+    let expected = "2 weeks 1 day 2 minutes";
+
+    assert_eq!(until_string(duration), expected);
+}
+
+#[test]
 fn until_string_with_less_than_a_minute() {
     let now = DateTime::parse_from_rfc3339("2017-09-24T00:00:00Z")
         .unwrap()
