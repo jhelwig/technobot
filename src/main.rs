@@ -27,7 +27,14 @@ fn main() {
                               c.prefix(&env::var("TECHNOBOT_PREFIX")
                                        .unwrap_or("~".to_owned()))
                           })
-                          .command("until_reset", |c| c.exec(commands::ffxiv::until_reset))
+                          .group("Final Fantasy XIV", |g| g
+                                 .prefix("ffxiv")
+                                 .command("resets", |c| {
+                                     c.desc("Show how long until the daily/weekly/crafting resets in FF XIV")
+                                         .help_available(true)
+                                         .exec(commands::ffxiv::resets)
+                                 })
+                          )
                           .command("ping", |c| c.exec(commands::misc::ping))
                           .command("latency", |c| c.exec(commands::misc::latency))
                           .command("8-ball", |c| c

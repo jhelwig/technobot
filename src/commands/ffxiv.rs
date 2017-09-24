@@ -5,8 +5,8 @@ use chrono::Timelike;
 use serenity::framework::standard::CommandError;
 use serenity::utils::Colour;
 
-command!(until_reset(_ctx, msg) {
-    let now: DateTime<Utc> = Utc::now();
+command!(resets(_ctx, msg) {
+    let now = Utc::now();
     let daily_reset = next_daily_reset(now);
     let weekly_reset = next_weekly_reset(now);
     let crafting_reset = next_crafting_reset(now);
