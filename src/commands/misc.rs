@@ -41,5 +41,5 @@ command!(eight_ball(_ctx, msg) {
         "Very doubtful"
     ];
 
-    let _ = msg.channel_id.say(format!("{}", rand::thread_rng().choose(&responses).unwrap()));
+    let _ = msg.channel_id.say(rand::thread_rng().choose(&responses).unwrap());
 });
