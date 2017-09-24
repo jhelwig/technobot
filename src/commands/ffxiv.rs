@@ -276,7 +276,7 @@ fn next_crafting_reset_on_friday() {
 }
 
 fn until_string(until_duration: Duration) -> String {
-    let mut until_string = String::new();
+    let mut components: Vec<String> = Vec::new();
     let mut how_long = until_duration.clone();
 
     if how_long.num_weeks() > 0 {
@@ -285,7 +285,7 @@ fn until_string(until_duration: Duration) -> String {
         } else {
             "weeks"
         };
-        until_string = format!("{} {} {}", until_string, how_long.num_weeks(), week_str);
+        components.push(format!("{} {}", how_long.num_weeks(), week_str));
     }
     how_long = how_long - Duration::weeks(how_long.num_weeks());
 
@@ -295,7 +295,7 @@ fn until_string(until_duration: Duration) -> String {
         } else {
             "days"
         };
-        until_string = format!("{} {} {}", until_string, how_long.num_days(), day_str);
+        components.push(format!("{} {}", how_long.num_days(), day_str));
     }
     how_long = how_long - Duration::days(how_long.num_days());
 
@@ -305,7 +305,7 @@ fn until_string(until_duration: Duration) -> String {
         } else {
             "hours"
         };
-        until_string = format!("{} {} {}", until_string, how_long.num_hours(), hour_str);
+        components.push(format!("{} {}", how_long.num_hours(), hour_str));
     }
     how_long = how_long - Duration::hours(how_long.num_hours());
 
@@ -315,10 +315,10 @@ fn until_string(until_duration: Duration) -> String {
         } else {
             "minutes"
         };
-        until_string = format!("{} {} {}", until_string, how_long.num_minutes(), minute_str);
+        components.push(format!("{} {}", how_long.num_minutes(), minute_str));
     }
 
-    until_string
+    components.join(" ")
 }
 
 #[test]
