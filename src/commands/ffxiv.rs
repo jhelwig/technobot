@@ -318,6 +318,10 @@ fn until_string(until_duration: Duration) -> String {
         components.push(format!("{} {}", how_long.num_minutes(), minute_str));
     }
 
+    if components.is_empty() {
+        components.push("less than a minute".to_string());
+    }
+
     components.join(" ")
 }
 
@@ -443,6 +447,20 @@ fn until_string_with_multiple_components() {
         .with_timezone(&Utc);
     let duration = event.signed_duration_since(now);
     let expected = "2 weeks 1 day 15 hours 2 minutes";
+
+    assert_eq!(until_string(duration), expected);
+}
+
+#[test]
+fn until_string_with_less_than_a_minute() {
+    let now = DateTime::parse_from_rfc3339("2017-09-24T00:00:00Z")
+        .unwrap()
+        .with_timezone(&Utc);
+    let event = DateTime::parse_from_rfc3339("2017-09-24T00:00:30Z")
+        .unwrap()
+        .with_timezone(&Utc);
+    let duration = event.signed_duration_since(now);
+    let expected = "less than a minute";
 
     assert_eq!(until_string(duration), expected);
 }
