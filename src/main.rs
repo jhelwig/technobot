@@ -21,7 +21,7 @@ fn main() {
     let mut client = Client::new(&env::var("DISCORD_TOKEN").unwrap(), Handler);
 
     client.with_framework(StandardFramework::new()
-                          .configure(|c| c.prefix("~"))
+                          .configure(|c| c.prefix(&env::var("TECHNOBOT_PREFIX").unwrap_or("~".to_owned())))
                           .command("ping", |c| c.exec(commands::misc::ping))
                           .command("latency", |c| c.exec(commands::misc::latency))
                           .command("8-ball", |c| c.exec(commands::misc::eight_ball)));
