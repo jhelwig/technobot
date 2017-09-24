@@ -27,7 +27,10 @@ fn main() {
                           .command("until_reset", |c| c.exec(commands::ffxiv::until_reset))
                           .command("ping", |c| c.exec(commands::misc::ping))
                           .command("latency", |c| c.exec(commands::misc::latency))
-                          .command("8-ball", |c| c.exec(commands::misc::eight_ball))
+                          .command("8-ball", |c| c
+                                   .desc("Ask the magic 8-ball any yes/no question")
+                                   .exec(commands::misc::eight_ball)
+                          )
                           .command("help", |c| c.exec_help(help_commands::with_embeds))
     );
 
