@@ -3,6 +3,7 @@ use chrono::Datelike;
 use chrono::Duration;
 use chrono::Timelike;
 use serenity::framework::standard::CommandError;
+use serenity::utils::Colour;
 
 command!(until_reset(_ctx, msg) {
     let now: DateTime<Utc> = Utc::now();
@@ -14,16 +15,16 @@ command!(until_reset(_ctx, msg) {
     let until_weekly = until_string(weekly_reset.signed_duration_since(now));
     let until_crafting = until_string(crafting_reset.signed_duration_since(now));
 
-    let _ = msg.channel_id.say(
-        format!(
-            "Daily reset is in {until_daily}\n\
-             Weekly reset is in {until_weekly}\n\
-             Crafting reset is in {until_crafting}",
-            until_daily=until_daily,
-            until_weekly=until_weekly,
-            until_crafting=until_crafting
-        )
-    );
+    let _ = msg.channel_id.send_message(|m| {
+        m.embed(|e| {
+            let mut embed = e.colour(Colour::rosewater()).title("FF XIV Resets");
+            embed = embed.field(|f| { f.name("Daily").value(until_daily).inline(false) });
+            embed = embed.field(|f| { f.name("Weekly").value(until_weekly).inline(false) });
+            embed = embed.field(|f| { f.name("Crafting").value(until_crafting).inline(false) });
+
+            embed
+        })
+    });
 });
 
 fn next_daily_reset(now: DateTime<Utc>) -> DateTime<Utc> {
