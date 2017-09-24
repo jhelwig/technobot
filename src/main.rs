@@ -4,10 +4,17 @@ extern crate serenity;
 mod commands;
 
 use serenity::prelude::*;
+use serenity::model::*;
 use serenity::framework::StandardFramework;
+
 use std::env;
 
-struct Handler; impl EventHandler for Handler {}
+struct Handler;
+impl EventHandler for Handler {
+    fn on_ready(&self, _: Context, ready: Ready) {
+        println!("{} is connected!", ready.user.name);
+    }
+}
 
 fn main() {
     let mut client = Client::new(&env::var("DISCORD_TOKEN").unwrap(), Handler);
