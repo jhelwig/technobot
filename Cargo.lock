@@ -2,6 +2,7 @@
 name = "technobot"
 version = "0.1.0"
 dependencies = [
+ "rand 0.3.16 (registry+https://github.com/rust-lang/crates.io-index)",
  "serenity 0.3.0 (git+https://github.com/zeyla/serenity)",
 ]
 

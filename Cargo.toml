@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Jacob Helwig <jacob@technosorcery.net>"]
 
 [dependencies]
+rand = "0.3.16"
 
 [dependencies.serenity]
 git = "https://github.com/zeyla/serenity"

@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate serenity;
+extern crate rand;
 
 mod commands;
 
@@ -20,9 +21,10 @@ fn main() {
     let mut client = Client::new(&env::var("DISCORD_TOKEN").unwrap(), Handler);
 
     client.with_framework(StandardFramework::new()
-        .configure(|c| c.prefix("~"))
-        .command("ping", |c| c.exec(commands::misc::ping))
-        .command("latency", |c| c.exec(commands::misc::latency)));
+                          .configure(|c| c.prefix("~"))
+                          .command("ping", |c| c.exec(commands::misc::ping))
+                          .command("latency", |c| c.exec(commands::misc::latency))
+                          .command("8-ball", |c| c.exec(commands::misc::eight_ball)));
 
     if let Err(why) = client.start_autosharded() {
         println!("Client error: {:?}", why);
