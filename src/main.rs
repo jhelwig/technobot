@@ -8,6 +8,7 @@ mod commands;
 use serenity::prelude::*;
 use serenity::model::*;
 use serenity::framework::StandardFramework;
+use serenity::framework::standard::help_commands;
 
 use std::env;
 
@@ -27,6 +28,7 @@ fn main() {
                           .command("ping", |c| c.exec(commands::misc::ping))
                           .command("latency", |c| c.exec(commands::misc::latency))
                           .command("8-ball", |c| c.exec(commands::misc::eight_ball))
+                          .command("help", |c| c.exec_help(help_commands::with_embeds))
     );
 
     if let Err(why) = client.start_autosharded() {
