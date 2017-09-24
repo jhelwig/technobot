@@ -276,7 +276,7 @@ fn next_crafting_reset_on_friday() {
 }
 
 fn until_string(until_duration: Duration) -> String {
-    let mut components: Vec<String> = Vec::new();
+    let mut components = Vec::new();
     let mut how_long = until_duration.clone();
 
     if how_long.num_weeks() > 0 {
