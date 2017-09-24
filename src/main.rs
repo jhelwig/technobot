@@ -23,7 +23,10 @@ fn main() {
     let mut client = Client::new(&env::var("DISCORD_TOKEN").unwrap(), Handler);
 
     client.with_framework(StandardFramework::new()
-                          .configure(|c| c.prefix(&env::var("TECHNOBOT_PREFIX").unwrap_or("~".to_owned())))
+                          .configure(|c| {
+                              c.prefix(&env::var("TECHNOBOT_PREFIX")
+                                       .unwrap_or("~".to_owned()))
+                          })
                           .command("until_reset", |c| c.exec(commands::ffxiv::until_reset))
                           .command("ping", |c| c.exec(commands::misc::ping))
                           .command("latency", |c| c.exec(commands::misc::latency))
