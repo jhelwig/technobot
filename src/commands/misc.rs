@@ -1,5 +1,3 @@
-use serenity::framework::standard::CommandError;
-
 use rand;
 use rand::Rng;
 

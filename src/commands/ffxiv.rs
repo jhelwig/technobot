@@ -2,7 +2,6 @@ use chrono::prelude::{DateTime, Utc, Weekday};
 use chrono::Datelike;
 use chrono::Duration;
 use chrono::Timelike;
-use serenity::framework::standard::CommandError;
 use serenity::utils::Colour;
 
 command!(resets(_ctx, msg) {
