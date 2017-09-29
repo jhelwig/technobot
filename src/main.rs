@@ -1,7 +1,15 @@
 extern crate chrono;
+extern crate futures;
+extern crate hyper;
 extern crate rand;
+extern crate scraper;
+extern crate serde;
+#[macro_use]
+extern crate serde_derive;
+extern crate serde_json;
 #[macro_use]
 extern crate serenity;
+extern crate tokio_core;
 
 mod commands;
 
@@ -25,14 +33,17 @@ fn main() {
     client.with_framework(StandardFramework::new()
                           .configure(|c| {
                               c.prefix(&env::var("TECHNOBOT_PREFIX")
-                                       .unwrap_or("~".to_owned()))
+                                       .unwrap_or("~".to_string()))
                           })
                           .group("Final Fantasy XIV", |g| g
                                  .prefix("ffxiv")
                                  .command("resets", |c| {
                                      c.desc("Show how long until the daily/weekly/crafting resets in FF XIV")
-                                         .help_available(true)
                                          .exec(commands::ffxiv::resets)
+                                 })
+                                 .command("events", |c| {
+                                     c.desc("List known events in FF XIV")
+                                         .exec(commands::ffxiv::events)
                                  })
                           )
                           .command("ping", |c| c.exec(commands::misc::ping))

@@ -1,8 +1,13 @@
 use chrono::prelude::{DateTime, Utc, Weekday};
-use chrono::Datelike;
-use chrono::Duration;
-use chrono::Timelike;
+use chrono::{Datelike,Duration,Timelike};
+use futures::Future;
+use futures::stream::Stream;
+use hyper;
+use hyper::Client;
+use scraper::{Html, Selector};
+use serde_json;
 use serenity::utils::Colour;
+use tokio_core::reactor::Core;
 
 command!(resets(_ctx, msg) {
     let now = Utc::now();
@@ -477,4 +482,244 @@ fn until_string_with_less_than_a_minute() {
     let expected = "less than a minute";
 
     assert_eq!(until_string(duration), expected);
+}
+
+command!(events(_ctx, msg) {
+    let now = Utc::now();
+
+    let events = get_events();
+    match events {
+        Ok(even) => {
+            for event in even.iter() {
+                if event.end > now {
+                    let _ = msg.channel_id.send_message(|m| {
+                        m.embed(|e| {
+                            let mut embed = e.colour(Colour::rosewater()).title(event.name());
+                            embed = embed.field(|f| { f.name("More information").value(event.url()).inline(false) });
+                            if event.start > now {
+                                embed = embed.field(|f| { f.name("Start").value(until_string(event.start.signed_duration_since(now))).inline(false) });
+                            };
+                            embed = embed.field(|f| { f.name("End").value(until_string(event.end.signed_duration_since(now))).inline(false) });
+                            if let Some(ref info) = event.info {
+                                embed = embed.field(|f| { f.name("Info").value(info) });
+                            }
+
+                            embed
+                        })
+                    });
+                }
+            }
+        },
+        Err(e) => { println!("{}", e); },
+    };
+});
+
+fn get_events() -> Result<Vec<FFXIVEvent>, String> {
+    let json = retrieve_event_json();
+    let timers;
+    match json {
+        Ok(j) => { timers = parse_event_json(&j) },
+        Err(e) => return Err(format!("{}", e)),
+    };
+
+    match timers {
+        Ok(t) => Ok(t.events),
+        Err(e) => Err(format!("{}", e)),
+    }
+}
+
+fn retrieve_event_json() -> Result<Vec<u8>, hyper::Error> {
+    let mut core = Core::new()?;
+    let client = Client::new(&core.handle());
+
+    let req = client.get("http://www.xenoveritas.org/static/ffxiv/timers.json".parse()?);
+    let res = core.run(req)?;
+
+    match res.body().concat2().wait() {
+        Ok(r) => Ok(r.to_vec()),
+        Err(e) => Err(e),
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
+struct FFXIVTimers {
+    #[serde(rename = "timers")]
+    pub events: Vec<FFXIVEvent>,
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
+struct FFXIVEvent {
+    #[serde(rename = "name")]
+    pub name_html: String,
+    #[serde(rename = "type")]
+    pub kind: String,
+    #[serde(with = "javascript_date_format")]
+    pub start: DateTime<Utc>,
+    #[serde(with = "javascript_date_format")]
+    pub end: DateTime<Utc>,
+    pub info: Option<String>,
+}
+
+impl FFXIVEvent {
+    pub fn name(&self) -> String {
+        let fragment = Html::parse_fragment(&self.name_html);
+        let selector = Selector::parse("a").unwrap();
+
+        let link = fragment.select(&selector).next().unwrap();
+
+        link.inner_html()
+    }
+
+    pub fn url(&self) -> String {
+        let fragment = Html::parse_fragment(&self.name_html);
+        let selector = Selector::parse("a").unwrap();
+
+        let link = fragment.select(&selector).next().unwrap();
+
+        link.value().attr("href").unwrap().to_string()
+    }
+}
+
+mod javascript_date_format {
+    use chrono::prelude::{DateTime, Utc};
+    use chrono::naive::NaiveDateTime;
+    use serde::{Deserialize, Serializer, Deserializer};
+
+    // The signature of a serialize_with function must follow the pattern:
+    //
+    //    fn serialize<S>(&T, S) -> Result<S::Ok, S::Error> where S: Serializer
+    //
+    // although it may also be generic over the input types T.
+    pub fn serialize<S>(date: &DateTime<Utc>, serializer: S) -> Result<S::Ok, S::Error>
+        where S: Serializer
+    {
+        let s = format!("{}", date.format("%s000"));
+        serializer.serialize_str(&s)
+    }
+
+    // The signature of a deserialize_with function must follow the pattern:
+    //
+    //    fn deserialize<D>(D) -> Result<T, D::Error> where D: Deserializer
+    //
+    // although it may also be generic over the output types T.
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<DateTime<Utc>, D::Error>
+        where D: Deserializer<'de>
+    {
+        let stamp = f64::deserialize(deserializer)? as i64;
+        //Utc.datetime_from_str(&s, FORMAT).map_err(serde::de::Error::custom)
+        Ok(DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(stamp / 1000, 0), Utc))
+    }
+}
+
+fn parse_event_json(event_json: &Vec<u8>) -> Result<FFXIVTimers, String> {
+    let result = serde_json::from_slice(&event_json);
+    match result {
+        Ok(r) => Ok(r),
+        Err(e) => Err(format!("{}", e)),
+    }
+}
+
+#[test]
+fn parse_event_json_with_info() {
+    let json_to_parse = r#"{"timers":[{"name":"<a href=\"http://na.finalfantasyxiv.com/mount_campaign_2017/\">Fly the Falcon Mount Campaign</a>","type":"campaign","start":14988924E5,"end":150684114E4,"info":"Players who purchase a total of 90 days of subscription time during this time period will receive a Falcon mount."}]}"#;
+    let expected = FFXIVTimers {
+        events: vec![
+            FFXIVEvent {
+                name_html: "<a href=\"http://na.finalfantasyxiv.com/mount_campaign_2017/\">Fly the Falcon Mount Campaign</a>".to_string(),
+                kind: "campaign".to_string(),
+                start: DateTime::parse_from_rfc3339("2017-07-01T07:00:00Z")
+                    .unwrap()
+                    .with_timezone(&Utc),
+                end: DateTime::parse_from_rfc3339("2017-10-01T06:59:00Z")
+                    .unwrap()
+                    .with_timezone(&Utc),
+                info: Some("Players who purchase a total of 90 days of subscription time during this time period will receive a Falcon mount.".to_string())
+            }
+        ]
+    };
+
+    let result: FFXIVTimers = parse_event_json(&json_to_parse.to_string().into_bytes()).unwrap();
+
+    assert_eq!(result, expected);
+}
+
+#[test]
+fn parse_event_json_without_info() {
+    let json_to_parse = r#"{"timers":[{"name":"<a href=\"http://na.finalfantasyxiv.com/lodestone/special/2017/The_Rising/\">The Rising</a>","type":"event rising","start":15037596E5,"end":150540114E4,"showDuration":true}]}"#;
+    let expected = FFXIVTimers {
+        events: vec![
+            FFXIVEvent {
+                name_html: "<a href=\"http://na.finalfantasyxiv.com/lodestone/special/2017/The_Rising/\">The Rising</a>".to_string(),
+                kind: "event rising".to_string(),
+                start: DateTime::parse_from_rfc3339("2017-08-26T15:00:00Z")
+                    .unwrap()
+                    .with_timezone(&Utc),
+                end: DateTime::parse_from_rfc3339("2017-09-14T14:59:00Z")
+                    .unwrap()
+                    .with_timezone(&Utc),
+                info: None
+            }
+        ]
+    };
+
+    let result: FFXIVTimers = parse_event_json(&json_to_parse.to_string().into_bytes()).unwrap();
+
+    assert_eq!(result, expected);
+}
+
+#[test]
+fn parse_event_json_with_multiple_events() {
+    let json_to_parse = r#"{"timers":[{"name":"<a href=\"http://na.finalfantasyxiv.com/mount_campaign_2017/\">Fly the Falcon Mount Campaign</a>","type":"campaign","start":14988924E5,"end":150684114E4,"info":"Players who purchase a total of 90 days of subscription time during this time period will receive a Falcon mount."},{"name":"<a href=\"http://na.finalfantasyxiv.com/lodestone/special/2017/The_Rising/\">The Rising</a>","type":"event rising","start":15037596E5,"end":150540114E4,"showDuration":true},{"name":"<a href=\"https://na.finalfantasyxiv.com/lodestone/special/2017/youkai-watch/\">Yo-kai Watch</a>","type":"event yokai-watch","start":15044256E5,"end":150954834E4,"showDuration":true},{"name":"<a href=\"http://na.finalfantasyxiv.com/lodestone/news/detail/5c652e0bf15a5028c3d2762c78d9ed094c475472\">All Worlds Maintenance (Sep. 14)</a>","type":"maintenance","start":15054552E5,"end":1505466E6}]}"#;
+    let expected = FFXIVTimers {
+        events: vec![
+            FFXIVEvent {
+                name_html: "<a href=\"http://na.finalfantasyxiv.com/mount_campaign_2017/\">Fly the Falcon Mount Campaign</a>".to_string(),
+                kind: "campaign".to_string(),
+                start: DateTime::parse_from_rfc3339("2017-07-01T07:00:00Z")
+                    .unwrap()
+                    .with_timezone(&Utc),
+                end: DateTime::parse_from_rfc3339("2017-10-01T06:59:00Z")
+                    .unwrap()
+                    .with_timezone(&Utc),
+                info: Some("Players who purchase a total of 90 days of subscription time during this time period will receive a Falcon mount.".to_string())
+            },
+            FFXIVEvent {
+                name_html: "<a href=\"http://na.finalfantasyxiv.com/lodestone/special/2017/The_Rising/\">The Rising</a>".to_string(),
+                kind: "event rising".to_string(),
+                start: DateTime::parse_from_rfc3339("2017-08-26T15:00:00Z")
+                    .unwrap()
+                    .with_timezone(&Utc),
+                end: DateTime::parse_from_rfc3339("2017-09-14T14:59:00Z")
+                    .unwrap()
+                    .with_timezone(&Utc),
+                info: None
+            },
+            FFXIVEvent {
+                name_html: "<a href=\"https://na.finalfantasyxiv.com/lodestone/special/2017/youkai-watch/\">Yo-kai Watch</a>".to_string(),
+                kind: "event yokai-watch".to_string(),
+                start: DateTime::parse_from_rfc3339("2017-09-03T08:00:00Z")
+                    .unwrap()
+                    .with_timezone(&Utc),
+                end: DateTime::parse_from_rfc3339("2017-11-01T14:59:00Z")
+                    .unwrap()
+                    .with_timezone(&Utc),
+                info: None
+            },
+            FFXIVEvent {
+                name_html: "<a href=\"http://na.finalfantasyxiv.com/lodestone/news/detail/5c652e0bf15a5028c3d2762c78d9ed094c475472\">All Worlds Maintenance (Sep. 14)</a>".to_string(),
+                kind: "maintenance".to_string(),
+                start: DateTime::parse_from_rfc3339("2017-09-15T06:00:00Z")
+                    .unwrap()
+                    .with_timezone(&Utc),
+                end: DateTime::parse_from_rfc3339("2017-09-15T09:00:00Z")
+                    .unwrap()
+                    .with_timezone(&Utc),
+                info: None
+            }
+        ]
+    };
+
+    let result: FFXIVTimers = parse_event_json(&json_to_parse.to_string().into_bytes()).unwrap();
+
+    assert_eq!(result, expected);
 }
