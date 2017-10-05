@@ -67,6 +67,10 @@ fn main() {
                           )
                           .command("whatis", |c| c.exec(commands::dictionary::get_dictionary_entry))
                           .command("learn", |c| c.exec(commands::dictionary::set_dictionary_entry))
+                          .command("forget", |c| c
+                                   .exec(commands::dictionary::delete_dictionary_entry)
+                                   .allowed_roles(vec!["technobot-dictionary-admin"])
+                          )
                           .command("help", |c| c.exec_help(help_commands::with_embeds))
     );
 

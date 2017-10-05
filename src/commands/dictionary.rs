@@ -7,6 +7,7 @@ use std::error::Error;
 enum RedisCommand {
     Get,
     Set,
+    Delete,
 }
 
 thread_local! {
@@ -79,6 +80,31 @@ command!(set_dictionary_entry(_ctx, msg, args) {
     let _ = msg.channel_id.say(response);
 });
 
+command!(delete_dictionary_entry(_ctx, msg, args) {
+    let guild_id = msg.guild_id();
+
+    let short_key = args.single::<String>().unwrap();
+    let key;
+    match guild_id {
+        None => {
+            let _ = msg.channel_id.say("Sorry, I can't do that here.");
+            return Ok(());
+        },
+        Some(GuildId(g)) => {
+            key = namespaced_dictionary_key(&short_key, g);
+        },
+    };
+
+    let result = execute_redis_command(RedisCommand::Delete, &key, None::<&String>);
+
+    let response = match result {
+        Ok(_) => format!("I don't know what {} is anymore.", short_key),
+        Err(e) => format!("I couldn't forget {key}: {error}", key=short_key, error=e),
+    };
+
+    let _ = msg.channel_id.say(response);
+});
+
 fn execute_redis_command<'a, T>(cmd: RedisCommand, key: &String, val: Option<&'a T>) -> Result<Option<String>, String> where &'a T: redis::ToRedisArgs{
     REDIS_CONNECTION.with(|r| {
         let con: &redis::RedisResult<redis::Connection> = &*r.borrow();
@@ -101,6 +127,19 @@ fn execute_redis_command<'a, T>(cmd: RedisCommand, key: &String, val: Option<&'a
                     RedisCommand::Set => {
                         match c.set(key, val) {
                             Ok(()) => Ok(None),
+                            Err(e) => Err(e.description().to_string()),
+                        }
+                    },
+                    RedisCommand::Delete => {
+                        match c.exists(key.clone()) {
+                            Ok(true) => {
+                                let result: Result<(), redis::RedisError> = c.del(key);
+                                match result {
+                                    Ok(_) => Ok(None),
+                                    Err(e) => Err(e.description().to_string()),
+                                }
+                            },
+                            Ok(false) => Ok(None),
                             Err(e) => Err(e.description().to_string()),
                         }
                     },
