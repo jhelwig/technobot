@@ -64,5 +64,5 @@ command!(dice(_ctx, msg, arg) {
         total += rand::thread_rng().gen_range(0, sides) + 1;
     }
 
-    let _ = msg.channel_id.say(format!("Rolled {} and got {}", roll, total));
+    let _ = msg.reply(&format!("Rolled {} and got {}", roll, total));
 });
