@@ -32,9 +32,10 @@ fn main() {
     let mut client = Client::new(&env::var("DISCORD_TOKEN").unwrap(), Handler);
 
     client.with_framework(StandardFramework::new()
-                          .configure(|c| {
-                              c.prefix(&env::var("TECHNOBOT_PREFIX")
-                                       .unwrap_or("~".to_string()))
+                          .configure(|c| { c
+                                           .prefix(&env::var("TECHNOBOT_PREFIX")
+                                                   .unwrap_or("~".to_string()))
+                                           .case_insensitivity(true)
                           })
                           .group("Final Fantasy XIV", |g| g
                                  .prefix("ffxiv")
