@@ -1,5 +1,6 @@
 use rand;
 use rand::Rng;
+use regex::Regex;
 
 command!(latency(ctx, msg) {
     let latency = ctx.shard.lock()
@@ -40,4 +41,28 @@ command!(eight_ball(_ctx, msg) {
     ];
 
     let _ = msg.channel_id.say(rand::thread_rng().choose(&responses).unwrap());
+});
+
+command!(dice(_ctx, msg, arg) {
+    let roll = arg.single::<String>().unwrap();
+    let re = Regex::new("^(?P<quantity>\\d+)?d(?P<sides>\\d+)$").unwrap();
+    let caps = match re.captures(&roll) {
+        Some(c) => c,
+        None => return Ok(()),
+    };
+
+    let quantity = match caps.name("quantity") {
+        Some(m) => m.as_str().parse::<u64>().unwrap(),
+        None => 1,
+    };
+
+    let sides = caps.name("sides").unwrap().as_str().parse::<u64>().unwrap();
+
+    let mut total = 0;
+
+    for _ in 0..quantity {
+        total += rand::thread_rng().gen_range(0, sides) + 1;
+    }
+
+    let _ = msg.channel_id.say(format!("Rolled {} and got {}", roll, total));
 });

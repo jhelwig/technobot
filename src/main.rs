@@ -2,6 +2,7 @@ extern crate chrono;
 extern crate futures;
 extern crate hyper;
 extern crate rand;
+extern crate regex;
 extern crate scraper;
 extern crate serde;
 #[macro_use]
@@ -52,6 +53,7 @@ fn main() {
                                    .desc("Ask the magic 8-ball any yes/no question")
                                    .exec(commands::misc::eight_ball)
                           )
+                          .command("roll", |c| c.exec(commands::misc::dice))
                           .command("help", |c| c.exec_help(help_commands::with_embeds))
     );
 
