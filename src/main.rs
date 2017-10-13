@@ -54,7 +54,10 @@ fn main() {
                                    .desc("Ask the magic 8-ball any yes/no question")
                                    .exec(commands::misc::eight_ball)
                           )
-                          .command("roll", |c| c.exec(commands::misc::dice))
+                          .command("roll", |c| c
+                                   .exec(commands::misc::dice)
+                                   .num_args(1)
+                          )
                           .command("help", |c| c.exec_help(help_commands::with_embeds))
     );
 
