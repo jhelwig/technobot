@@ -32,21 +32,21 @@ fn main() {
     let mut client = Client::new(&env::var("DISCORD_TOKEN").unwrap(), Handler);
 
     client.with_framework(StandardFramework::new()
-                          .configure(|c| { c
-                                           .prefix(&env::var("TECHNOBOT_PREFIX")
-                                                   .unwrap_or("~".to_string()))
-                                           .case_insensitivity(true)
-                          })
+                          .configure(|c| c
+                                     .prefix(&env::var("TECHNOBOT_PREFIX")
+                                             .unwrap_or("~".to_string()))
+                                     .case_insensitivity(true)
+                          )
                           .group("Final Fantasy XIV", |g| g
                                  .prefix("ffxiv")
-                                 .command("resets", |c| {
-                                     c.desc("Show how long until the daily/weekly/crafting resets in FF XIV")
-                                         .exec(commands::ffxiv::resets)
-                                 })
-                                 .command("events", |c| {
-                                     c.desc("List known events in FF XIV")
-                                         .exec(commands::ffxiv::events)
-                                 })
+                                 .command("resets", |c| c
+                                          .desc("Show how long until the daily/weekly/crafting resets in FF XIV")
+                                          .exec(commands::ffxiv::resets)
+                                 )
+                                 .command("events", |c| c
+                                          .desc("List known events in FF XIV")
+                                          .exec(commands::ffxiv::events)
+                                 )
                           )
                           .command("ping", |c| c.exec(commands::misc::ping))
                           .command("latency", |c| c.exec(commands::misc::latency))
@@ -54,7 +54,10 @@ fn main() {
                                    .desc("Ask the magic 8-ball any yes/no question")
                                    .exec(commands::misc::eight_ball)
                           )
-                          .command("roll", |c| c.exec(commands::misc::dice))
+                          .command("roll", |c| c
+                                   .exec(commands::misc::dice)
+                                   .num_args(1)
+                          )
                           .command("help", |c| c.exec_help(help_commands::with_embeds))
     );
 
