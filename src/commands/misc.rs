@@ -44,19 +44,19 @@ command!(eight_ball(_ctx, msg) {
 });
 
 command!(dice(_ctx, msg, arg) {
-    let roll = arg.single::<String>().unwrap();
-    let re = Regex::new("^(?P<quantity>\\d+)?d(?P<sides>\\d+)$").unwrap();
+    let roll = arg.single::<String>().expect("Couldn't parse arg as a String");
+    let re = Regex::new("^(?P<quantity>\\d+)?d(?P<sides>\\d+)$").expect("Couldn't create regex");
     let caps = match re.captures(&roll) {
         Some(c) => c,
         None => return Ok(()),
     };
 
     let quantity = match caps.name("quantity") {
-        Some(m) => m.as_str().parse::<u64>().unwrap(),
+        Some(m) => m.as_str().parse::<u64>().expect("Couldn't parse quantity of dice"),
         None => 1,
     };
 
-    let sides = caps.name("sides").unwrap().as_str().parse::<u64>().unwrap();
+    let sides = caps.name("sides").unwrap().as_str().parse::<u64>().expect("Couldn't parse how many sides per die");
 
     let mut total = 0;
 
