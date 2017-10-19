@@ -48,42 +48,6 @@ fn next_daily_reset(now: DateTime<Utc>) -> DateTime<Utc> {
     daily_reset
 }
 
-#[test]
-fn next_daily_reset_when_before_reset_time() {
-    let now: DateTime<Utc> = DateTime::parse_from_rfc3339("2017-09-24T04:00:00-00:00")
-        .unwrap()
-        .with_timezone(&Utc);
-    let expected_reset: DateTime<Utc> = DateTime::parse_from_rfc3339("2017-09-24T15:00:00-00:00")
-        .unwrap()
-        .with_timezone(&Utc);
-    let daily_reset = next_daily_reset(now);
-
-    assert_eq!(daily_reset,
-               expected_reset,
-               "Expected next daily reset from {:?} to be at {:?}. Got: {:?}",
-               now,
-               expected_reset,
-               daily_reset);
-}
-
-#[test]
-fn next_daily_reset_when_after_reset_time() {
-    let now: DateTime<Utc> = DateTime::parse_from_rfc3339("2017-09-30T15:00:00-00:00")
-        .unwrap()
-        .with_timezone(&Utc);
-    let expected_reset: DateTime<Utc> = DateTime::parse_from_rfc3339("2017-10-01T15:00:00-00:00")
-        .unwrap()
-        .with_timezone(&Utc);
-    let daily_reset = next_daily_reset(now);
-
-    assert_eq!(daily_reset,
-               expected_reset,
-               "Expected next daily reset from {:?} to be at {:?}. Got: {:?}",
-               now,
-               expected_reset,
-               daily_reset);
-}
-
 fn next_weekly_reset(now: DateTime<Utc>) -> DateTime<Utc> {
     // Weekly reset is every Tuesday at 08:00 UTC.
     let mut weekly_reset: DateTime<Utc> = now.with_hour(8)
@@ -107,78 +71,6 @@ fn next_weekly_reset(now: DateTime<Utc>) -> DateTime<Utc> {
     }
 
     weekly_reset
-}
-
-#[test]
-fn next_weekly_reset_before_reset_time_on_tuesday() {
-    let now = DateTime::parse_from_rfc3339("2017-09-19T06:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let expected_reset = DateTime::parse_from_rfc3339("2017-09-19T08:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let weekly_reset = next_weekly_reset(now);
-
-    assert_eq!(weekly_reset,
-               expected_reset,
-               "Expected next weekly reset from {:?} to be at {:?}. Got: {:?}",
-               now,
-               expected_reset,
-               weekly_reset);
-}
-
-#[test]
-fn next_weekly_reset_after_reset_time_on_tuesday() {
-    let now = DateTime::parse_from_rfc3339("2017-09-19T08:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let expected_reset = DateTime::parse_from_rfc3339("2017-09-26T08:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let weekly_reset = next_weekly_reset(now);
-
-    assert_eq!(weekly_reset,
-               expected_reset,
-               "Expected next weekly reset from {:?} to be at {:?}. Got: {:?}",
-               now,
-               expected_reset,
-               weekly_reset);
-}
-
-#[test]
-fn next_weekly_reset_on_monday() {
-    let now = DateTime::parse_from_rfc3339("2017-09-18T06:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let expected_reset = DateTime::parse_from_rfc3339("2017-09-19T08:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let weekly_reset = next_weekly_reset(now);
-
-    assert_eq!(weekly_reset,
-               expected_reset,
-               "Expected next weekly reset from {:?} to be at {:?}. Got: {:?}",
-               now,
-               expected_reset,
-               weekly_reset);
-}
-
-#[test]
-fn next_weekly_reset_on_wednesday() {
-    let now = DateTime::parse_from_rfc3339("2017-09-20T06:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let expected_reset = DateTime::parse_from_rfc3339("2017-09-26T08:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let weekly_reset = next_weekly_reset(now);
-
-    assert_eq!(weekly_reset,
-               expected_reset,
-               "Expected next weekly reset from {:?} to be at {:?}. Got: {:?}",
-               now,
-               expected_reset,
-               weekly_reset);
 }
 
 fn next_crafting_reset(now: DateTime<Utc>) -> DateTime<Utc> {
@@ -206,78 +98,6 @@ fn next_crafting_reset(now: DateTime<Utc>) -> DateTime<Utc> {
     }
 
     crafting_reset
-}
-
-#[test]
-fn next_crafting_reset_before_reset_time_on_thursday() {
-    let now = DateTime::parse_from_rfc3339("2017-09-21T06:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let expected_reset = DateTime::parse_from_rfc3339("2017-09-21T08:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let crafting_reset = next_crafting_reset(now);
-
-    assert_eq!(crafting_reset,
-               expected_reset,
-               "Expected next crafting reset from {:?} to be at {:?}. Got: {:?}",
-               now,
-               expected_reset,
-               crafting_reset);
-}
-
-#[test]
-fn next_crafting_reset_after_reset_time_on_thursday() {
-    let now = DateTime::parse_from_rfc3339("2017-09-28T08:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let expected_reset = DateTime::parse_from_rfc3339("2017-10-05T08:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let crafting_reset = next_crafting_reset(now);
-
-    assert_eq!(crafting_reset,
-               expected_reset,
-               "Expected next crafting reset from {:?} to be at {:?}. Got: {:?}",
-               now,
-               expected_reset,
-               crafting_reset);
-}
-
-#[test]
-fn next_crafting_reset_on_wednesday() {
-    let now = DateTime::parse_from_rfc3339("2017-09-20T06:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let expected_reset = DateTime::parse_from_rfc3339("2017-09-21T08:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let crafting_reset = next_crafting_reset(now);
-
-    assert_eq!(crafting_reset,
-               expected_reset,
-               "Expected next crafting reset from {:?} to be at {:?}. Got: {:?}",
-               now,
-               expected_reset,
-               crafting_reset);
-}
-
-#[test]
-fn next_crafting_reset_on_friday() {
-    let now = DateTime::parse_from_rfc3339("2017-09-22T06:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let expected_reset = DateTime::parse_from_rfc3339("2017-09-28T08:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let crafting_reset = next_crafting_reset(now);
-
-    assert_eq!(crafting_reset,
-               expected_reset,
-               "Expected next crafting reset from {:?} to be at {:?}. Got: {:?}",
-               now,
-               expected_reset,
-               crafting_reset);
 }
 
 fn until_string(until_duration: Duration) -> String {
@@ -328,160 +148,6 @@ fn until_string(until_duration: Duration) -> String {
     }
 
     components.join(" ")
-}
-
-#[test]
-fn until_string_with_one_week() {
-    let now = DateTime::parse_from_rfc3339("2017-09-24T00:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let event = DateTime::parse_from_rfc3339("2017-10-01T00:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let duration = event.signed_duration_since(now);
-    let expected = "1 week";
-
-    assert_eq!(until_string(duration), expected);
-}
-
-#[test]
-fn until_string_with_multiple_weeks() {
-    let now = DateTime::parse_from_rfc3339("2017-09-24T00:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let event = DateTime::parse_from_rfc3339("2017-10-08T00:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let duration = event.signed_duration_since(now);
-    let expected = "2 weeks";
-
-    assert_eq!(until_string(duration), expected);
-}
-
-#[test]
-fn until_string_with_one_day() {
-    let now = DateTime::parse_from_rfc3339("2017-09-24T00:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let event = DateTime::parse_from_rfc3339("2017-09-25T00:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let duration = event.signed_duration_since(now);
-    let expected = "1 day";
-
-    assert_eq!(until_string(duration), expected);
-}
-
-#[test]
-fn until_string_with_multiple_days() {
-    let now = DateTime::parse_from_rfc3339("2017-09-24T00:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let event = DateTime::parse_from_rfc3339("2017-09-26T00:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let duration = event.signed_duration_since(now);
-    let expected = "2 days";
-
-    assert_eq!(until_string(duration), expected);
-}
-
-#[test]
-fn until_string_with_one_hour() {
-    let now = DateTime::parse_from_rfc3339("2017-09-24T00:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let event = DateTime::parse_from_rfc3339("2017-09-24T01:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let duration = event.signed_duration_since(now);
-    let expected = "1 hour";
-
-    assert_eq!(until_string(duration), expected);
-}
-
-#[test]
-fn until_string_with_multiple_hours() {
-    let now = DateTime::parse_from_rfc3339("2017-09-24T00:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let event = DateTime::parse_from_rfc3339("2017-09-24T02:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let duration = event.signed_duration_since(now);
-    let expected = "2 hours";
-
-    assert_eq!(until_string(duration), expected);
-}
-
-#[test]
-fn until_string_with_one_minute() {
-    let now = DateTime::parse_from_rfc3339("2017-09-24T00:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let event = DateTime::parse_from_rfc3339("2017-09-24T00:01:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let duration = event.signed_duration_since(now);
-    let expected = "1 minute";
-
-    assert_eq!(until_string(duration), expected);
-}
-
-#[test]
-fn until_string_with_multiple_minutes() {
-    let now = DateTime::parse_from_rfc3339("2017-09-24T00:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let event = DateTime::parse_from_rfc3339("2017-09-24T00:02:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let duration = event.signed_duration_since(now);
-    let expected = "2 minutes";
-
-    assert_eq!(until_string(duration), expected);
-}
-
-#[test]
-fn until_string_with_multiple_components() {
-    let now = DateTime::parse_from_rfc3339("2017-09-24T00:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let event = DateTime::parse_from_rfc3339("2017-10-09T15:02:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let duration = event.signed_duration_since(now);
-    let expected = "2 weeks 1 day 15 hours 2 minutes";
-
-    assert_eq!(until_string(duration), expected);
-}
-
-#[test]
-fn until_string_with_multiple_components_with_gap() {
-    let now = DateTime::parse_from_rfc3339("2017-09-24T00:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let event = DateTime::parse_from_rfc3339("2017-10-09T00:02:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let duration = event.signed_duration_since(now);
-    let expected = "2 weeks 1 day 2 minutes";
-
-    assert_eq!(until_string(duration), expected);
-}
-
-#[test]
-fn until_string_with_less_than_a_minute() {
-    let now = DateTime::parse_from_rfc3339("2017-09-24T00:00:00Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let event = DateTime::parse_from_rfc3339("2017-09-24T00:00:30Z")
-        .unwrap()
-        .with_timezone(&Utc);
-    let duration = event.signed_duration_since(now);
-    let expected = "less than a minute";
-
-    assert_eq!(until_string(duration), expected);
 }
 
 command!(events(_ctx, msg) {
@@ -619,107 +285,446 @@ fn parse_event_json(event_json: &Vec<u8>) -> Result<FFXIVTimers, String> {
     }
 }
 
-#[test]
-fn parse_event_json_with_info() {
-    let json_to_parse = r#"{"timers":[{"name":"<a href=\"http://na.finalfantasyxiv.com/mount_campaign_2017/\">Fly the Falcon Mount Campaign</a>","type":"campaign","start":14988924E5,"end":150684114E4,"info":"Players who purchase a total of 90 days of subscription time during this time period will receive a Falcon mount."}]}"#;
-    let expected = FFXIVTimers {
-        events: vec![
-            FFXIVEvent {
-                name_html: "<a href=\"http://na.finalfantasyxiv.com/mount_campaign_2017/\">Fly the Falcon Mount Campaign</a>".to_string(),
-                kind: "campaign".to_string(),
-                start: DateTime::parse_from_rfc3339("2017-07-01T07:00:00Z")
-                    .unwrap()
-                    .with_timezone(&Utc),
-                end: DateTime::parse_from_rfc3339("2017-10-01T06:59:00Z")
-                    .unwrap()
-                    .with_timezone(&Utc),
-                info: Some("Players who purchase a total of 90 days of subscription time during this time period will receive a Falcon mount.".to_string())
-            }
-        ]
-    };
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-    let result: FFXIVTimers = parse_event_json(&json_to_parse.to_string().into_bytes()).unwrap();
+    #[test]
+    fn next_daily_reset_when_before_reset_time() {
+        let now: DateTime<Utc> = DateTime::parse_from_rfc3339("2017-09-24T04:00:00-00:00")
+            .unwrap()
+            .with_timezone(&Utc);
+        let expected_reset: DateTime<Utc> = DateTime::parse_from_rfc3339("2017-09-24T15:00:00-00:00")
+            .unwrap()
+            .with_timezone(&Utc);
+        let daily_reset = next_daily_reset(now);
 
-    assert_eq!(result, expected);
-}
+        assert_eq!(daily_reset,
+                   expected_reset,
+                   "Expected next daily reset from {:?} to be at {:?}. Got: {:?}",
+                   now,
+                   expected_reset,
+                   daily_reset);
+    }
 
-#[test]
-fn parse_event_json_without_info() {
-    let json_to_parse = r#"{"timers":[{"name":"<a href=\"http://na.finalfantasyxiv.com/lodestone/special/2017/The_Rising/\">The Rising</a>","type":"event rising","start":15037596E5,"end":150540114E4,"showDuration":true}]}"#;
-    let expected = FFXIVTimers {
-        events: vec![
-            FFXIVEvent {
-                name_html: "<a href=\"http://na.finalfantasyxiv.com/lodestone/special/2017/The_Rising/\">The Rising</a>".to_string(),
-                kind: "event rising".to_string(),
-                start: DateTime::parse_from_rfc3339("2017-08-26T15:00:00Z")
-                    .unwrap()
-                    .with_timezone(&Utc),
-                end: DateTime::parse_from_rfc3339("2017-09-14T14:59:00Z")
-                    .unwrap()
-                    .with_timezone(&Utc),
-                info: None
-            }
-        ]
-    };
+    #[test]
+    fn next_daily_reset_when_after_reset_time() {
+        let now: DateTime<Utc> = DateTime::parse_from_rfc3339("2017-09-30T15:00:00-00:00")
+            .unwrap()
+            .with_timezone(&Utc);
+        let expected_reset: DateTime<Utc> = DateTime::parse_from_rfc3339("2017-10-01T15:00:00-00:00")
+            .unwrap()
+            .with_timezone(&Utc);
+        let daily_reset = next_daily_reset(now);
 
-    let result: FFXIVTimers = parse_event_json(&json_to_parse.to_string().into_bytes()).unwrap();
+        assert_eq!(daily_reset,
+                   expected_reset,
+                   "Expected next daily reset from {:?} to be at {:?}. Got: {:?}",
+                   now,
+                   expected_reset,
+                   daily_reset);
+    }
 
-    assert_eq!(result, expected);
-}
+    #[test]
+    fn next_weekly_reset_before_reset_time_on_tuesday() {
+        let now = DateTime::parse_from_rfc3339("2017-09-19T06:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let expected_reset = DateTime::parse_from_rfc3339("2017-09-19T08:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let weekly_reset = next_weekly_reset(now);
 
-#[test]
-fn parse_event_json_with_multiple_events() {
-    let json_to_parse = r#"{"timers":[{"name":"<a href=\"http://na.finalfantasyxiv.com/mount_campaign_2017/\">Fly the Falcon Mount Campaign</a>","type":"campaign","start":14988924E5,"end":150684114E4,"info":"Players who purchase a total of 90 days of subscription time during this time period will receive a Falcon mount."},{"name":"<a href=\"http://na.finalfantasyxiv.com/lodestone/special/2017/The_Rising/\">The Rising</a>","type":"event rising","start":15037596E5,"end":150540114E4,"showDuration":true},{"name":"<a href=\"https://na.finalfantasyxiv.com/lodestone/special/2017/youkai-watch/\">Yo-kai Watch</a>","type":"event yokai-watch","start":15044256E5,"end":150954834E4,"showDuration":true},{"name":"<a href=\"http://na.finalfantasyxiv.com/lodestone/news/detail/5c652e0bf15a5028c3d2762c78d9ed094c475472\">All Worlds Maintenance (Sep. 14)</a>","type":"maintenance","start":15054552E5,"end":1505466E6}]}"#;
-    let expected = FFXIVTimers {
-        events: vec![
-            FFXIVEvent {
-                name_html: "<a href=\"http://na.finalfantasyxiv.com/mount_campaign_2017/\">Fly the Falcon Mount Campaign</a>".to_string(),
-                kind: "campaign".to_string(),
-                start: DateTime::parse_from_rfc3339("2017-07-01T07:00:00Z")
-                    .unwrap()
-                    .with_timezone(&Utc),
-                end: DateTime::parse_from_rfc3339("2017-10-01T06:59:00Z")
-                    .unwrap()
-                    .with_timezone(&Utc),
-                info: Some("Players who purchase a total of 90 days of subscription time during this time period will receive a Falcon mount.".to_string())
-            },
-            FFXIVEvent {
-                name_html: "<a href=\"http://na.finalfantasyxiv.com/lodestone/special/2017/The_Rising/\">The Rising</a>".to_string(),
-                kind: "event rising".to_string(),
-                start: DateTime::parse_from_rfc3339("2017-08-26T15:00:00Z")
-                    .unwrap()
-                    .with_timezone(&Utc),
-                end: DateTime::parse_from_rfc3339("2017-09-14T14:59:00Z")
-                    .unwrap()
-                    .with_timezone(&Utc),
-                info: None
-            },
-            FFXIVEvent {
-                name_html: "<a href=\"https://na.finalfantasyxiv.com/lodestone/special/2017/youkai-watch/\">Yo-kai Watch</a>".to_string(),
-                kind: "event yokai-watch".to_string(),
-                start: DateTime::parse_from_rfc3339("2017-09-03T08:00:00Z")
-                    .unwrap()
-                    .with_timezone(&Utc),
-                end: DateTime::parse_from_rfc3339("2017-11-01T14:59:00Z")
-                    .unwrap()
-                    .with_timezone(&Utc),
-                info: None
-            },
-            FFXIVEvent {
-                name_html: "<a href=\"http://na.finalfantasyxiv.com/lodestone/news/detail/5c652e0bf15a5028c3d2762c78d9ed094c475472\">All Worlds Maintenance (Sep. 14)</a>".to_string(),
-                kind: "maintenance".to_string(),
-                start: DateTime::parse_from_rfc3339("2017-09-15T06:00:00Z")
-                    .unwrap()
-                    .with_timezone(&Utc),
-                end: DateTime::parse_from_rfc3339("2017-09-15T09:00:00Z")
-                    .unwrap()
-                    .with_timezone(&Utc),
-                info: None
-            }
-        ]
-    };
+        assert_eq!(weekly_reset,
+                   expected_reset,
+                   "Expected next weekly reset from {:?} to be at {:?}. Got: {:?}",
+                   now,
+                   expected_reset,
+                   weekly_reset);
+    }
 
-    let result: FFXIVTimers = parse_event_json(&json_to_parse.to_string().into_bytes()).unwrap();
+    #[test]
+    fn next_weekly_reset_after_reset_time_on_tuesday() {
+        let now = DateTime::parse_from_rfc3339("2017-09-19T08:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let expected_reset = DateTime::parse_from_rfc3339("2017-09-26T08:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let weekly_reset = next_weekly_reset(now);
 
-    assert_eq!(result, expected);
+        assert_eq!(weekly_reset,
+                   expected_reset,
+                   "Expected next weekly reset from {:?} to be at {:?}. Got: {:?}",
+                   now,
+                   expected_reset,
+                   weekly_reset);
+    }
+
+    #[test]
+    fn next_weekly_reset_on_monday() {
+        let now = DateTime::parse_from_rfc3339("2017-09-18T06:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let expected_reset = DateTime::parse_from_rfc3339("2017-09-19T08:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let weekly_reset = next_weekly_reset(now);
+
+        assert_eq!(weekly_reset,
+                   expected_reset,
+                   "Expected next weekly reset from {:?} to be at {:?}. Got: {:?}",
+                   now,
+                   expected_reset,
+                   weekly_reset);
+    }
+
+    #[test]
+    fn next_weekly_reset_on_wednesday() {
+        let now = DateTime::parse_from_rfc3339("2017-09-20T06:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let expected_reset = DateTime::parse_from_rfc3339("2017-09-26T08:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let weekly_reset = next_weekly_reset(now);
+
+        assert_eq!(weekly_reset,
+                   expected_reset,
+                   "Expected next weekly reset from {:?} to be at {:?}. Got: {:?}",
+                   now,
+                   expected_reset,
+                   weekly_reset);
+    }
+
+    #[test]
+    fn next_crafting_reset_before_reset_time_on_thursday() {
+        let now = DateTime::parse_from_rfc3339("2017-09-21T06:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let expected_reset = DateTime::parse_from_rfc3339("2017-09-21T08:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let crafting_reset = next_crafting_reset(now);
+
+        assert_eq!(crafting_reset,
+                   expected_reset,
+                   "Expected next crafting reset from {:?} to be at {:?}. Got: {:?}",
+                   now,
+                   expected_reset,
+                   crafting_reset);
+    }
+
+    #[test]
+    fn next_crafting_reset_after_reset_time_on_thursday() {
+        let now = DateTime::parse_from_rfc3339("2017-09-28T08:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let expected_reset = DateTime::parse_from_rfc3339("2017-10-05T08:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let crafting_reset = next_crafting_reset(now);
+
+        assert_eq!(crafting_reset,
+                   expected_reset,
+                   "Expected next crafting reset from {:?} to be at {:?}. Got: {:?}",
+                   now,
+                   expected_reset,
+                   crafting_reset);
+    }
+
+    #[test]
+    fn next_crafting_reset_on_wednesday() {
+        let now = DateTime::parse_from_rfc3339("2017-09-20T06:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let expected_reset = DateTime::parse_from_rfc3339("2017-09-21T08:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let crafting_reset = next_crafting_reset(now);
+
+        assert_eq!(crafting_reset,
+                   expected_reset,
+                   "Expected next crafting reset from {:?} to be at {:?}. Got: {:?}",
+                   now,
+                   expected_reset,
+                   crafting_reset);
+    }
+
+    #[test]
+    fn next_crafting_reset_on_friday() {
+        let now = DateTime::parse_from_rfc3339("2017-09-22T06:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let expected_reset = DateTime::parse_from_rfc3339("2017-09-28T08:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let crafting_reset = next_crafting_reset(now);
+
+        assert_eq!(crafting_reset,
+                   expected_reset,
+                   "Expected next crafting reset from {:?} to be at {:?}. Got: {:?}",
+                   now,
+                   expected_reset,
+                   crafting_reset);
+    }
+
+    #[test]
+    fn until_string_with_one_week() {
+        let now = DateTime::parse_from_rfc3339("2017-09-24T00:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let event = DateTime::parse_from_rfc3339("2017-10-01T00:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let duration = event.signed_duration_since(now);
+        let expected = "1 week";
+
+        assert_eq!(until_string(duration), expected);
+    }
+
+    #[test]
+    fn until_string_with_multiple_weeks() {
+        let now = DateTime::parse_from_rfc3339("2017-09-24T00:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let event = DateTime::parse_from_rfc3339("2017-10-08T00:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let duration = event.signed_duration_since(now);
+        let expected = "2 weeks";
+
+        assert_eq!(until_string(duration), expected);
+    }
+
+    #[test]
+    fn until_string_with_one_day() {
+        let now = DateTime::parse_from_rfc3339("2017-09-24T00:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let event = DateTime::parse_from_rfc3339("2017-09-25T00:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let duration = event.signed_duration_since(now);
+        let expected = "1 day";
+
+        assert_eq!(until_string(duration), expected);
+    }
+
+    #[test]
+    fn until_string_with_multiple_days() {
+        let now = DateTime::parse_from_rfc3339("2017-09-24T00:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let event = DateTime::parse_from_rfc3339("2017-09-26T00:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let duration = event.signed_duration_since(now);
+        let expected = "2 days";
+
+        assert_eq!(until_string(duration), expected);
+    }
+
+    #[test]
+    fn until_string_with_one_hour() {
+        let now = DateTime::parse_from_rfc3339("2017-09-24T00:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let event = DateTime::parse_from_rfc3339("2017-09-24T01:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let duration = event.signed_duration_since(now);
+        let expected = "1 hour";
+
+        assert_eq!(until_string(duration), expected);
+    }
+
+    #[test]
+    fn until_string_with_multiple_hours() {
+        let now = DateTime::parse_from_rfc3339("2017-09-24T00:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let event = DateTime::parse_from_rfc3339("2017-09-24T02:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let duration = event.signed_duration_since(now);
+        let expected = "2 hours";
+
+        assert_eq!(until_string(duration), expected);
+    }
+
+    #[test]
+    fn until_string_with_one_minute() {
+        let now = DateTime::parse_from_rfc3339("2017-09-24T00:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let event = DateTime::parse_from_rfc3339("2017-09-24T00:01:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let duration = event.signed_duration_since(now);
+        let expected = "1 minute";
+
+        assert_eq!(until_string(duration), expected);
+    }
+
+    #[test]
+    fn until_string_with_multiple_minutes() {
+        let now = DateTime::parse_from_rfc3339("2017-09-24T00:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let event = DateTime::parse_from_rfc3339("2017-09-24T00:02:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let duration = event.signed_duration_since(now);
+        let expected = "2 minutes";
+
+        assert_eq!(until_string(duration), expected);
+    }
+
+    #[test]
+    fn until_string_with_multiple_components() {
+        let now = DateTime::parse_from_rfc3339("2017-09-24T00:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let event = DateTime::parse_from_rfc3339("2017-10-09T15:02:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let duration = event.signed_duration_since(now);
+        let expected = "2 weeks 1 day 15 hours 2 minutes";
+
+        assert_eq!(until_string(duration), expected);
+    }
+
+    #[test]
+    fn until_string_with_multiple_components_with_gap() {
+        let now = DateTime::parse_from_rfc3339("2017-09-24T00:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let event = DateTime::parse_from_rfc3339("2017-10-09T00:02:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let duration = event.signed_duration_since(now);
+        let expected = "2 weeks 1 day 2 minutes";
+
+        assert_eq!(until_string(duration), expected);
+    }
+
+    #[test]
+    fn until_string_with_less_than_a_minute() {
+        let now = DateTime::parse_from_rfc3339("2017-09-24T00:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let event = DateTime::parse_from_rfc3339("2017-09-24T00:00:30Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let duration = event.signed_duration_since(now);
+        let expected = "less than a minute";
+
+        assert_eq!(until_string(duration), expected);
+    }
+
+    #[test]
+    fn parse_event_json_with_info() {
+        let json_to_parse = r#"{"timers":[{"name":"<a href=\"http://na.finalfantasyxiv.com/mount_campaign_2017/\">Fly the Falcon Mount Campaign</a>","type":"campaign","start":14988924E5,"end":150684114E4,"info":"Players who purchase a total of 90 days of subscription time during this time period will receive a Falcon mount."}]}"#;
+        let expected = FFXIVTimers {
+            events: vec![
+                FFXIVEvent {
+                    name_html: "<a href=\"http://na.finalfantasyxiv.com/mount_campaign_2017/\">Fly the Falcon Mount Campaign</a>".to_string(),
+                    kind: "campaign".to_string(),
+                    start: DateTime::parse_from_rfc3339("2017-07-01T07:00:00Z")
+                        .unwrap()
+                        .with_timezone(&Utc),
+                    end: DateTime::parse_from_rfc3339("2017-10-01T06:59:00Z")
+                        .unwrap()
+                        .with_timezone(&Utc),
+                    info: Some("Players who purchase a total of 90 days of subscription time during this time period will receive a Falcon mount.".to_string())
+                }
+            ]
+        };
+
+        let result: FFXIVTimers = parse_event_json(&json_to_parse.to_string().into_bytes()).unwrap();
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn parse_event_json_without_info() {
+        let json_to_parse = r#"{"timers":[{"name":"<a href=\"http://na.finalfantasyxiv.com/lodestone/special/2017/The_Rising/\">The Rising</a>","type":"event rising","start":15037596E5,"end":150540114E4,"showDuration":true}]}"#;
+        let expected = FFXIVTimers {
+            events: vec![
+                FFXIVEvent {
+                    name_html: "<a href=\"http://na.finalfantasyxiv.com/lodestone/special/2017/The_Rising/\">The Rising</a>".to_string(),
+                    kind: "event rising".to_string(),
+                    start: DateTime::parse_from_rfc3339("2017-08-26T15:00:00Z")
+                        .unwrap()
+                        .with_timezone(&Utc),
+                    end: DateTime::parse_from_rfc3339("2017-09-14T14:59:00Z")
+                        .unwrap()
+                        .with_timezone(&Utc),
+                    info: None
+                }
+            ]
+        };
+
+        let result: FFXIVTimers = parse_event_json(&json_to_parse.to_string().into_bytes()).unwrap();
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn parse_event_json_with_multiple_events() {
+        let json_to_parse = r#"{"timers":[{"name":"<a href=\"http://na.finalfantasyxiv.com/mount_campaign_2017/\">Fly the Falcon Mount Campaign</a>","type":"campaign","start":14988924E5,"end":150684114E4,"info":"Players who purchase a total of 90 days of subscription time during this time period will receive a Falcon mount."},{"name":"<a href=\"http://na.finalfantasyxiv.com/lodestone/special/2017/The_Rising/\">The Rising</a>","type":"event rising","start":15037596E5,"end":150540114E4,"showDuration":true},{"name":"<a href=\"https://na.finalfantasyxiv.com/lodestone/special/2017/youkai-watch/\">Yo-kai Watch</a>","type":"event yokai-watch","start":15044256E5,"end":150954834E4,"showDuration":true},{"name":"<a href=\"http://na.finalfantasyxiv.com/lodestone/news/detail/5c652e0bf15a5028c3d2762c78d9ed094c475472\">All Worlds Maintenance (Sep. 14)</a>","type":"maintenance","start":15054552E5,"end":1505466E6}]}"#;
+        let expected = FFXIVTimers {
+            events: vec![
+                FFXIVEvent {
+                    name_html: "<a href=\"http://na.finalfantasyxiv.com/mount_campaign_2017/\">Fly the Falcon Mount Campaign</a>".to_string(),
+                    kind: "campaign".to_string(),
+                    start: DateTime::parse_from_rfc3339("2017-07-01T07:00:00Z")
+                        .unwrap()
+                        .with_timezone(&Utc),
+                    end: DateTime::parse_from_rfc3339("2017-10-01T06:59:00Z")
+                        .unwrap()
+                        .with_timezone(&Utc),
+                    info: Some("Players who purchase a total of 90 days of subscription time during this time period will receive a Falcon mount.".to_string())
+                },
+                FFXIVEvent {
+                    name_html: "<a href=\"http://na.finalfantasyxiv.com/lodestone/special/2017/The_Rising/\">The Rising</a>".to_string(),
+                    kind: "event rising".to_string(),
+                    start: DateTime::parse_from_rfc3339("2017-08-26T15:00:00Z")
+                        .unwrap()
+                        .with_timezone(&Utc),
+                    end: DateTime::parse_from_rfc3339("2017-09-14T14:59:00Z")
+                        .unwrap()
+                        .with_timezone(&Utc),
+                    info: None
+                },
+                FFXIVEvent {
+                    name_html: "<a href=\"https://na.finalfantasyxiv.com/lodestone/special/2017/youkai-watch/\">Yo-kai Watch</a>".to_string(),
+                    kind: "event yokai-watch".to_string(),
+                    start: DateTime::parse_from_rfc3339("2017-09-03T08:00:00Z")
+                        .unwrap()
+                        .with_timezone(&Utc),
+                    end: DateTime::parse_from_rfc3339("2017-11-01T14:59:00Z")
+                        .unwrap()
+                        .with_timezone(&Utc),
+                    info: None
+                },
+                FFXIVEvent {
+                    name_html: "<a href=\"http://na.finalfantasyxiv.com/lodestone/news/detail/5c652e0bf15a5028c3d2762c78d9ed094c475472\">All Worlds Maintenance (Sep. 14)</a>".to_string(),
+                    kind: "maintenance".to_string(),
+                    start: DateTime::parse_from_rfc3339("2017-09-15T06:00:00Z")
+                        .unwrap()
+                        .with_timezone(&Utc),
+                    end: DateTime::parse_from_rfc3339("2017-09-15T09:00:00Z")
+                        .unwrap()
+                        .with_timezone(&Utc),
+                    info: None
+                }
+            ]
+        };
+
+        let result: FFXIVTimers = parse_event_json(&json_to_parse.to_string().into_bytes()).unwrap();
+
+        assert_eq!(result, expected);
+    }
 }

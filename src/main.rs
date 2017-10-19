@@ -1,4 +1,5 @@
 extern crate chrono;
+extern crate dotenv;
 extern crate futures;
 extern crate hyper;
 extern crate rand;
@@ -14,6 +15,7 @@ extern crate tokio_core;
 
 mod commands;
 
+use dotenv::dotenv;
 use serenity::prelude::*;
 use serenity::model::*;
 use serenity::framework::StandardFramework;
@@ -29,7 +31,9 @@ impl EventHandler for Handler {
 }
 
 fn main() {
-    let mut client = Client::new(&env::var("DISCORD_TOKEN").unwrap(), Handler);
+    dotenv().ok();
+
+    let mut client = Client::new(&env::var("DISCORD_TOKEN").expect("Could not read DISCORD_TOKEN environment variable"), Handler);
 
     client.with_framework(StandardFramework::new()
                           .configure(|c| c
@@ -56,7 +60,7 @@ fn main() {
                           )
                           .command("roll", |c| c
                                    .exec(commands::misc::dice)
-                                   .num_args(1)
+                                   .max_args(1)
                           )
                           .command("help", |c| c.exec_help(help_commands::with_embeds))
     );
