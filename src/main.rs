@@ -60,7 +60,7 @@ fn main() {
                           )
                           .command("roll", |c| c
                                    .exec(commands::misc::dice)
-                                   .num_args(1)
+                                   .max_args(1)
                           )
                           .command("help", |c| c.exec_help(help_commands::with_embeds))
     );

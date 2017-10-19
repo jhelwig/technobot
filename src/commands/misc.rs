@@ -44,7 +44,11 @@ command!(eight_ball(_ctx, msg) {
 });
 
 command!(dice(_ctx, msg, arg) {
-    let roll = arg.single::<String>().expect("Couldn't parse arg as a String");
+    let roll = match arg.single::<String>() {
+        Ok(r) => r,
+        Err(_)=> "1d1000".to_string(),
+    };
+
     let re = Regex::new("^(?P<quantity>\\d+)?d(?P<sides>\\d+)$").expect("Couldn't create regex");
     let caps = match re.captures(&roll) {
         Some(c) => c,
