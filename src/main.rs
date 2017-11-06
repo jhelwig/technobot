@@ -1,8 +1,7 @@
 extern crate chrono;
 extern crate dotenv;
-extern crate futures;
-extern crate hyper;
 extern crate rand;
+extern crate reqwest;
 extern crate regex;
 extern crate scraper;
 extern crate serde;
@@ -11,7 +10,6 @@ extern crate serde_derive;
 extern crate serde_json;
 #[macro_use]
 extern crate serenity;
-extern crate tokio_core;
 
 mod commands;
 

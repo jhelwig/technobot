@@ -1,13 +1,10 @@
 use chrono::prelude::{DateTime, Utc, Weekday};
-use chrono::{Datelike,Duration,Timelike};
-use futures::Future;
-use futures::stream::Stream;
-use hyper;
-use hyper::Client;
+use chrono::{Datelike, Duration, Timelike};
+use reqwest;
 use scraper::{Html, Selector};
 use serde_json;
 use serenity::utils::Colour;
-use tokio_core::reactor::Core;
+use std::io::Read;
 
 command!(resets(_ctx, msg) {
     let now = Utc::now();
@@ -194,17 +191,22 @@ fn get_events() -> Result<Vec<FFXIVEvent>, String> {
     }
 }
 
-fn retrieve_event_json() -> Result<Vec<u8>, hyper::Error> {
-    let mut core = Core::new()?;
-    let client = Client::new(&core.handle());
+fn retrieve_event_json() -> Result<String, String> {
+    let url = "http://www.xenoveritas.org/static/ffxiv/timers.json";
+    let mut resp = match reqwest::get(url) {
+        Ok(r) => r,
+        Err(e) => return Err(format!("{}", e)),
+    };
 
-    let req = client.get("http://www.xenoveritas.org/static/ffxiv/timers.json".parse()?);
-    let res = core.run(req)?;
-
-    match res.body().concat2().wait() {
-        Ok(r) => Ok(r.to_vec()),
-        Err(e) => Err(e),
+    if !resp.status().is_success() {
+        return Err(format!("Unable to fetch {}: {}", url, resp.status()));
     }
+
+    let mut content = String::new();
+    if let Err(e) = resp.read_to_string(&mut content) {
+        return Err(format!("Invalid content: {}", e));
+    }
+    Ok(content)
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
@@ -277,8 +279,8 @@ mod javascript_date_format {
     }
 }
 
-fn parse_event_json(event_json: &Vec<u8>) -> Result<FFXIVTimers, String> {
-    let result = serde_json::from_slice(&event_json);
+fn parse_event_json(event_json: &str) -> Result<FFXIVTimers, String> {
+    let result = serde_json::from_str(event_json);
     match result {
         Ok(r) => Ok(r),
         Err(e) => Err(format!("{}", e)),
@@ -642,7 +644,7 @@ mod tests {
             ]
         };
 
-        let result: FFXIVTimers = parse_event_json(&json_to_parse.to_string().into_bytes()).unwrap();
+        let result: FFXIVTimers = parse_event_json(&json_to_parse).unwrap();
 
         assert_eq!(result, expected);
     }
@@ -666,7 +668,7 @@ mod tests {
             ]
         };
 
-        let result: FFXIVTimers = parse_event_json(&json_to_parse.to_string().into_bytes()).unwrap();
+        let result: FFXIVTimers = parse_event_json(&json_to_parse).unwrap();
 
         assert_eq!(result, expected);
     }
@@ -723,7 +725,7 @@ mod tests {
             ]
         };
 
-        let result: FFXIVTimers = parse_event_json(&json_to_parse.to_string().into_bytes()).unwrap();
+        let result: FFXIVTimers = parse_event_json(&json_to_parse).unwrap();
 
         assert_eq!(result, expected);
     }
