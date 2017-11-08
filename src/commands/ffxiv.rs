@@ -1,12 +1,14 @@
-use chrono::prelude::{DateTime, Utc, Weekday};
 use chrono::{Datelike, Duration, Timelike};
+use chrono::prelude::{DateTime, Utc, Weekday};
+use discord::Discord;
+use discord::model::Message;
+use framework::args::Args;
 use reqwest;
 use scraper::{Html, Selector};
 use serde_json;
-use serenity::utils::Colour;
 use std::io::Read;
 
-command!(resets(_ctx, msg) {
+pub fn resets(bot: &Discord, msg: &Message, _args: Args) {
     let now = Utc::now();
     let daily_reset = next_daily_reset(now);
     let weekly_reset = next_weekly_reset(now);
@@ -16,17 +18,16 @@ command!(resets(_ctx, msg) {
     let until_weekly = until_string(weekly_reset.signed_duration_since(now));
     let until_crafting = until_string(crafting_reset.signed_duration_since(now));
 
-    let _ = msg.channel_id.send_message(|m| {
-        m.embed(|e| {
-            let mut embed = e.colour(Colour::rosewater()).title("FF XIV Resets");
-            embed = embed.field(|f| { f.name("Daily").value(until_daily).inline(false) });
-            embed = embed.field(|f| { f.name("Weekly").value(until_weekly).inline(false) });
-            embed = embed.field(|f| { f.name("Crafting").value(until_crafting).inline(false) });
-
-            embed
-        })
+    let _ = bot.send_embed(msg.channel_id, "", |embed| {
+        embed
+            .title("FF XIV Resets")
+            .fields(|f| {
+                        f.field("Daily", &until_daily, false)
+                            .field("Weekly", &until_weekly, false)
+                            .field("Crafting", &until_crafting, false)
+                    })
     });
-});
+}
 
 fn next_daily_reset(now: DateTime<Utc>) -> DateTime<Utc> {
     // Daily reset is every day at 15:00 UTC.
@@ -147,7 +148,7 @@ fn until_string(until_duration: Duration) -> String {
     components.join(" ")
 }
 
-command!(events(_ctx, msg) {
+pub fn events(bot: &Discord, msg: &Message, _args: Args) {
     let now = Utc::now();
 
     let events = get_events();
@@ -155,33 +156,44 @@ command!(events(_ctx, msg) {
         Ok(even) => {
             for event in even.iter() {
                 if event.end > now {
-                    let _ = msg.channel_id.send_message(|m| {
-                        m.embed(|e| {
-                            let mut embed = e.colour(Colour::rosewater()).title(event.name());
-                            embed = embed.field(|f| { f.name("More information").value(event.url()).inline(false) });
-                            if event.start > now {
-                                embed = embed.field(|f| { f.name("Start").value(until_string(event.start.signed_duration_since(now))).inline(false) });
-                            };
-                            embed = embed.field(|f| { f.name("End").value(until_string(event.end.signed_duration_since(now))).inline(false) });
-                            if let Some(ref info) = event.info {
-                                embed = embed.field(|f| { f.name("Info").value(info) });
-                            }
-
-                            embed
-                        })
+                    let _ = bot.send_embed(msg.channel_id, "", |embed| {
+                        embed
+                            .title(&event.name())
+                            .fields(|f| {
+                                let mut fields = f;
+                                fields = fields.field("More information", &event.url(), false);
+                                if event.start > now {
+                                    fields = fields
+                                        .field("Start",
+                                               &until_string(event
+                                                                 .start
+                                                                 .signed_duration_since(now)),
+                                               false);
+                                }
+                                fields = fields
+                                    .field("End",
+                                           &until_string(event.end.signed_duration_since(now)),
+                                           false);
+                                if let Some(ref info) = event.info {
+                                    fields = fields.field("Info", info, false);
+                                }
+                                fields
+                            })
                     });
                 }
             }
-        },
-        Err(e) => { println!("{}", e); },
+        }
+        Err(e) => {
+            println!("{}", e);
+        }
     };
-});
+}
 
 fn get_events() -> Result<Vec<FFXIVEvent>, String> {
     let json = retrieve_event_json();
     let timers;
     match json {
-        Ok(j) => { timers = parse_event_json(&j) },
+        Ok(j) => timers = parse_event_json(&j),
         Err(e) => return Err(format!("{}", e)),
     };
 
@@ -296,7 +308,7 @@ mod tests {
         let now: DateTime<Utc> = DateTime::parse_from_rfc3339("2017-09-24T04:00:00-00:00")
             .unwrap()
             .with_timezone(&Utc);
-        let expected_reset: DateTime<Utc> = DateTime::parse_from_rfc3339("2017-09-24T15:00:00-00:00")
+        let expected_reset: DateTime<Utc> = DateTime::parse_from_rfc3339("2017-09-24T15:00:00-00:00",)
             .unwrap()
             .with_timezone(&Utc);
         let daily_reset = next_daily_reset(now);
@@ -314,7 +326,7 @@ mod tests {
         let now: DateTime<Utc> = DateTime::parse_from_rfc3339("2017-09-30T15:00:00-00:00")
             .unwrap()
             .with_timezone(&Utc);
-        let expected_reset: DateTime<Utc> = DateTime::parse_from_rfc3339("2017-10-01T15:00:00-00:00")
+        let expected_reset: DateTime<Utc> = DateTime::parse_from_rfc3339("2017-10-01T15:00:00-00:00",)
             .unwrap()
             .with_timezone(&Utc);
         let daily_reset = next_daily_reset(now);
